@@ -6,6 +6,7 @@ import {
   Route,
 } from "react-router-dom";
 import Home from './components/Home';
+import { ToastContainer } from 'react-toastify'
 function App() {
 
   return (
@@ -13,6 +14,7 @@ function App() {
     <BrowserRouter>
     <nav>
     </nav>
+    <ToastContainer/>
     <Routes>
      <Route path='/' element={<Home/>}/>
 

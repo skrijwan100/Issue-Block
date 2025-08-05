@@ -7,6 +7,7 @@ import {
 } from "react-router-dom";
 import Home from './components/Home';
 import { ToastContainer } from 'react-toastify'
+import Allissue from './components/Allissue';
 function App() {
 
   return (
@@ -17,6 +18,7 @@ function App() {
     <ToastContainer/>
     <Routes>
      <Route path='/' element={<Home/>}/>
+     <Route path='/allissue' element={<Allissue/>}/>
 
     </Routes>
     

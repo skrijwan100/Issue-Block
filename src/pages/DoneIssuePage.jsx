@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { CheckCircle, Home, Copy, ExternalLink, Shield } from 'lucide-react';
-
+import { Link } from 'react-router';
 export default function SuccessPage({Tnxhash,issueId}) {
   const [copied, setCopied] = useState(false);
   const [showContent, setShowContent] = useState(false);
@@ -78,7 +78,7 @@ export default function SuccessPage({Tnxhash,issueId}) {
                   <div>
                     <h3 className="text-cyan-400 font-semibold mb-2 flex items-center">
                       <div className="w-2 h-2 bg-cyan-400 rounded-full mr-2"></div>
-                      Campaign Address:
+                      Contract Address:
                     </h3>
                     <p className="text-white font-mono text-lg">{formatHash(toAddress)}</p>
                   </div>
@@ -125,13 +125,13 @@ export default function SuccessPage({Tnxhash,issueId}) {
 
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="group relative px-8 py-4 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-2xl">
+              <Link to="/allissue"><button className="group relative px-8 py-4 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-2xl">
                 <div className="flex items-center space-x-3">
                   <Home className="w-6 h-6" />
                   <span>Go To Home Page</span>
                 </div>
                 <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
-              </button>
+              </button></Link>
               
                <a target='_blank' href={`https://sepolia.etherscan.io/tx/${transactionHash}`}><button className="group relative px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-105 border border-white/20 hover:border-white/30">
                 <div className="flex items-center space-x-3">

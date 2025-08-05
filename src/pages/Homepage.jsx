@@ -99,6 +99,7 @@ export default function BlockchainHomepage() {
                             <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
                         </button>
                     </div>
+                   
 
                     {/* Features grid */}
                     <div className="grid md:grid-cols-3 gap-6 mt-16">

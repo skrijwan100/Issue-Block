@@ -6,6 +6,7 @@ import issuecontract from "../contracts/Issue.sol/IssueFactory.json"
 export default function Issuepage() {
     // Sample issues data
     const { ethereum } = window;
+    const [disc, setdisc] = useState('')
     useEffect(() => {
         const fecthallissue = async () => {
             setloder(true)
@@ -22,12 +23,22 @@ export default function Issuepage() {
             console.log(event)
             setissues(event)
             setloder(false)
-}
-fecthallissue();
+
+        }
+        fecthallissue();
 
     }, [])
-    const [issues,setissues] = useState([])
-    const [loder,setloder]=useState(false)
+
+    const fecthstory = async (story) => {
+        
+        const res = await fetch(`https://${import.meta.env.VITE_GATEWAY_URL}/ipfs/${story}`)
+        const resdata = await res.json()
+        console.log(resdata)
+        // return resdata;
+
+    }
+    const [issues, setissues] = useState([])
+    const [loder, setloder] = useState(false)
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-blue-900 to-cyan-900 relative overflow-hidden">
@@ -77,8 +88,8 @@ fecthallissue();
                     {/* Controls - Removed for now */}
 
                     {/* Issues list */}
-                    {loder?<div className='w-full h-[70vh] flex justify-center items-center '><div className='bigloder'></div></div> :<div className="space-y-6">
-                        {issues.map((data,index) => (
+                    {loder ? <div className='w-full h-[70vh] flex justify-center items-center '><div className='bigloder'></div></div> : <div className="space-y-6">
+                        {issues.map((data, index) => (
                             <div
                                 key={index}
                                 className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/10 hover:bg-white/10 transition-all duration-300 cursor-pointer"

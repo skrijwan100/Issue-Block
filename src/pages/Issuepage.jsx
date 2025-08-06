@@ -30,7 +30,7 @@ export default function Issuepage() {
     }, [])
 
     const fecthstory = async (story) => {
-        
+
         const res = await fetch(`https://${import.meta.env.VITE_GATEWAY_URL}/ipfs/${story}`)
         const resdata = await res.json()
         console.log(resdata)
@@ -90,9 +90,10 @@ export default function Issuepage() {
                     {/* Issues list */}
                     {loder ? <div className='w-full h-[70vh] flex justify-center items-center '><div className='bigloder'></div></div> : <div className="space-y-6">
                         {issues.map((data, index) => (
-                            <div
-                                key={index}
+                            <Link key={index} to={`/allissue/${data.args.issueaddress}`}> <div
+                                
                                 className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/10 hover:bg-white/10 transition-all duration-300 cursor-pointer"
+                                style={{marginBottom:"10px"}}
                             >
                                 <div className="flex gap-6">
                                     {/* Issue Image */}
@@ -121,6 +122,7 @@ export default function Issuepage() {
                                                 </h3>
                                                 <p className="text-gray-300 mb-3">
                                                     {data.args.disc}
+
                                                 </p>
 
                                             </div>
@@ -139,6 +141,7 @@ export default function Issuepage() {
                                     </div>
                                 </div>
                             </div>
+                            </Link>
                         ))}
                     </div>}
                 </div>

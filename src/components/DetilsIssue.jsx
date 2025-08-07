@@ -1,22 +1,44 @@
 import React, { useEffect, useState } from 'react';
-import { ArrowLeft, Calendar, User, ThumbsUp, ThumbsDown, AlertTriangle, Image as ImageIcon, ZoomIn } from 'lucide-react';
+import {Vote , ArrowLeft, Calendar, User, ThumbsUp, ThumbsDown, AlertTriangle, Image as ImageIcon, ZoomIn } from 'lucide-react';
 import { Link, useParams } from 'react-router';
 import { ethers } from 'ethers';
+import { BrowserProvider } from 'ethers';
 import contractofissue from "../contracts/Issue.sol/Issue.json"
 const IssueDetailsPage = () => {
     const { id } = useParams()
-    const [userVote, setUserVote] = useState(null);
-    const [agreeCount, setAgreeCount] = useState(15);
-    const [disagreeCount, setDisagreeCount] = useState(8);
-    const [selectedImage, setSelectedImage] = useState(null);
-    const [loder,setloder]=useState(false)
-    const [it,setit]=useState()
-    const [idisc,setidisc]=useState()
-    const [imgdata,setimgdata]=useState()
-    const [iown,setiown]=useState()
+    const { ethereum } = window;
+    const [loder, setloder] = useState(false)
+    const [it, setit] = useState()
+    const [idisc, setidisc] = useState()
+    const [imgdata, setimgdata] = useState()
+    const [iown, setiown] = useState()
+    const [Address, setAddress] = useState()
+    const [Bal, setBal] = useState()
+    const [Tnxload, setTnxload] = useState(false)
+    const [dTnxload, setdTnxload] = useState(false)
+    const [votedata, setvotedata] = useState([])
+    const [reload, setreload] = useState(false)
     useEffect(() => {
         const alldetiles = async () => {
             setloder(true)
+            if (!ethereum) {
+                return alert('Install Window');
+            }
+            const account = await ethereum.request({
+                method: 'eth_requestAccounts',
+            })
+            const fulladdress = account[0]
+            const showaddress = `${fulladdress.slice(0, 4)}...${fulladdress.slice(-4)}`
+            setAddress(showaddress)
+            const eth_bal = await ethereum.request({
+                method: 'eth_getBalance',
+                params: [
+                    account[0], 'latest'
+                ]
+            })
+            const fullbal = ethers.formatEther(eth_bal)
+            const showbal = fullbal.slice(0, 6)
+            setBal(showbal)
             const infuraProvider = new ethers.JsonRpcProvider(
                 import.meta.env.VITE_INFURA_URL
             )
@@ -29,10 +51,14 @@ const IssueDetailsPage = () => {
             const disciribe = await issuecontarct.I_disc();
             const I_img = await issuecontarct.I_img();
             const Owner = await issuecontarct.Owner();
-            console.log(title, disciribe, I_img, Owner)
+            const allvote = await issuecontarct.filters.Showvote()
+            const voteevent = await issuecontarct.queryFilter(allvote)
+            console.log(voteevent)
+            setvotedata(voteevent)
+            // console.log(title, disciribe, I_img, Owner)
             setimgdata(I_img)
             setit(title)
-            setiown(Owner)
+            setiown(`${Owner.slice(0, 4)}...${Owner.slice(-4)}`)
             const res = await fetch(`https://${import.meta.env.VITE_GATEWAY_URL}/ipfs/${disciribe}`)
             const resdata = await res.json()
             console.log(resdata)
@@ -40,20 +66,8 @@ const IssueDetailsPage = () => {
             setloder(false)
         }
         alldetiles()
-    }, [])
-    // Sample issue data
-    const issue = {
-        id: "QmXeMufubVTZ9yih1Rqc2TDovJMi6ZjWrooeFenjz6wstT",
-        title: "hiiiii",
-        description: "This is a detailed description of the issue that was reported by the user. It contains comprehensive information about the problem, steps to reproduce, expected behavior, and actual behavior observed. The issue affects the core functionality of the blockchain system and needs immediate attention from the development team.",
-        author: "0xe9..117d",
-        avatar: "/api/placeholder/40/40",
-        createdAt: "8/5/2025, 12:00:48 AM",
-        status: "Open",
-        category: "Bug Report",
-        priority: "High",
-        image: "https://amber-wonderful-kite-814.mypinata.cloud/ipfs/QmXUtjkUXFeD1uupEqurHTojW7HzVEisSb3uVGf5oAET5K"
-    };
+        setreload(false)
+    }, [reload])
 
     // Sample voting addresses
     const agreeAddresses = [
@@ -70,46 +84,48 @@ const IssueDetailsPage = () => {
         "0xa0f9e8d7c6b5a4f3e2d1c0b9a8f7e6d5c4b3a2f1e0d9c8b7a6f5e4d3c2"
     ];
 
-    const handleVote = (voteType) => {
-        if (userVote === voteType) {
-            // Remove vote if clicking same button
-            setUserVote(null);
-            if (voteType === 'agree') {
-                setAgreeCount(prev => prev - 1);
-            } else {
-                setDisagreeCount(prev => prev - 1);
-            }
-        } else {
-            // Change vote or add new vote
-            if (userVote === 'agree') {
-                setAgreeCount(prev => prev - 1);
-                setDisagreeCount(prev => prev + 1);
-            } else if (userVote === 'disagree') {
-                setDisagreeCount(prev => prev - 1);
-                setAgreeCount(prev => prev + 1);
-            } else {
-                // New vote
-                if (voteType === 'agree') {
-                    setAgreeCount(prev => prev + 1);
-                } else {
-                    setDisagreeCount(prev => prev + 1);
-                }
-            }
-            setUserVote(voteType);
-        }
-    };
-
     const formatAddress = (address) => {
         return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
     };
-
+    const handleaggrevote = async (e) => {
+        e.preventDefault();
+        setTnxload(true)
+        const WalletProvider = new BrowserProvider(ethereum)
+        const signer = await WalletProvider.getSigner();
+        const uservote = new ethers.Contract(
+            id,
+            contractofissue.abi,
+            signer
+        )
+        const uservoteTnx = await uservote.VoteforIssue(1)
+        await uservoteTnx.wait();
+        console.log(uservoteTnx)
+        setTnxload(false)
+        setreload(true)
+    }
+    const handledisaggrevote = async (e) => {
+        e.preventDefault();
+        setdTnxload(true)
+        const WalletProvider = new BrowserProvider(ethereum)
+        const signer = await WalletProvider.getSigner();
+        const uservote = new ethers.Contract(
+            id,
+            contractofissue.abi,
+            signer
+        )
+        const uservoteTnx = await uservote.VoteforIssue(0)
+        await uservoteTnx.wait();
+        console.log(uservoteTnx)
+        setdTnxload(false)
+        setreload(true)
+    }
     return (
         <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-blue-900 to-cyan-900">
             {/* Header */}
             <div>
 
 
-                <div className="bg-blue-800/30 backdrop-blur-sm border-b border-blue-700/50">
+                {loder ? "" : <div className="bg-blue-800/30 backdrop-blur-sm border-b border-blue-700/50">
                     <div className="max-w-6xl mx-auto px-6 py-4">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center space-x-4">
@@ -120,17 +136,29 @@ const IssueDetailsPage = () => {
                                     <div className="w-8 h-8 bg-cyan-500 rounded-lg flex items-center justify-center">
                                         <span className="text-white font-bold text-sm">B</span>
                                     </div>
-                                    <span className="text-white font-semibold text-xl">BlockChain Pro</span>
+                                    <span className="text-white font-semibold text-xl">IssueBlock</span>
                                 </div>
                             </div>
-                            <button className="px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-white rounded-lg font-medium transition-colors">
-                                New Issue
-                            </button>
+                            <div
+                                className="flex items-center gap-4 px-4 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-semibold rounded-full transition-all duration-300 transform hover:scale-105 hover:shadow-lg cursor-pointer"
+                                onClick={() => navigator.clipboard.writeText(Address)}
+                                title="Click to copy address"
+                            >
+                                <div style={{ height: "15px", width: "15px", backgroundColor: "#00ff41", borderRadius: "50%" }}>
+
+                                </div>
+
+                                {/* Address & Balance */}
+                                <div className="flex flex-col">
+                                    <span className="text-sm font-mono truncate max-w-[150px]">{Address}</span>
+                                    <span className="text-xs opacity-80">{Bal} SpETH</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
+                </div>}
 
-          { loder?<div className='w-full h-[70vh] flex justify-center items-center '><div className='bigloder'></div></div> :     <div className="max-w-6xl mx-auto px-6 py-8">
+                {loder ? <div className='w-full h-[70vh] flex justify-center items-center '><div className='bigloder'></div></div> : <div className="max-w-6xl mx-auto px-6 py-8">
                     {/* Issue Header */}
                     <div className="bg-blue-800/20 backdrop-blur-sm rounded-xl border border-blue-700/30 p-6 mb-6">
                         <div className="flex items-start justify-between mb-4">
@@ -138,14 +166,14 @@ const IssueDetailsPage = () => {
                                 <AlertTriangle className="w-6 h-6 text-cyan-400" />
                                 <h1 className="text-2xl font-bold text-white">{it}</h1>
                             </div>
-                            <div className="flex items-center space-x-2">
+                            {/* <div className="flex items-center space-x-2">
                                 <span className="px-3 py-1 bg-red-500/20 text-red-300 rounded-full text-sm font-medium">
                                     {issue.priority}
                                 </span>
                                 <span className="px-3 py-1 bg-green-500/20 text-green-300 rounded-full text-sm font-medium">
                                     {issue.status}
                                 </span>
-                            </div>
+                            </div> */}
                         </div>
 
                         <div className="flex items-center space-x-6 text-gray-300 text-sm mb-4">
@@ -155,16 +183,12 @@ const IssueDetailsPage = () => {
                             </div>
                             <div className="flex items-center space-x-2">
                                 <Calendar className="w-4 h-4" />
-                                <span>{issue.createdAt}</span>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                                <span className="w-2 h-2 bg-cyan-400 rounded-full"></span>
-                                <span>{issue.category}</span>
+                                <span>{Date.now()}</span>
                             </div>
                         </div>
 
                         <div className="text-gray-300 text-sm font-mono bg-blue-900/30 p-3 rounded-lg">
-                            ID: {id}
+                            ID:{id}
                         </div>
                     </div>
 
@@ -177,130 +201,89 @@ const IssueDetailsPage = () => {
                     </div>
 
                     {/* Image Section */}
-                 
-                        <div className="bg-blue-800/20 backdrop-blur-sm rounded-xl border border-blue-700/30 p-6 mb-6">
-                            <h2 className="text-xl font-semibold text-white mb-4 flex items-center">
-                                <ImageIcon className="w-5 h-5 mr-2" />
-                                Attached Image
-                            </h2>
 
-                            {/* Single Image Display */}
-                            <div className="relative">
-                                <div
-                                    className="relative group cursor-pointer overflow-hidden rounded-lg bg-blue-900/30 border border-blue-700/30"
-                                    onClick={() => setSelectedImage(issue.image)}
-                                >
-                                    <img
-                                        src={`https://${import.meta.env.VITE_GATEWAY_URL}/ipfs/${imgdata}`}
-                                        alt="Issue screenshot"
-                                        className="w-full h-auto max-h-96 object-contain transition-transform duration-300 group-hover:scale-105"
-                                    />
-                                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300 flex items-center justify-center">
-                                        <ZoomIn className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                                    </div>
+                    <div className="bg-blue-800/20 backdrop-blur-sm rounded-xl border border-blue-700/30 p-6 mb-6">
+                        <h2 className="text-xl font-semibold text-white mb-4 flex items-center">
+                            <ImageIcon className="w-5 h-5 mr-2" />
+                            Attached Image
+                        </h2>
+
+                        {/* Single Image Display */}
+                        <div className="relative">
+                            <div
+                                className="relative group cursor-pointer overflow-hidden rounded-lg bg-blue-900/30 border border-blue-700/30"
+                                onClick={() => setSelectedImage(issue.image)}
+                            >
+                                <img
+                                    src={`https://${import.meta.env.VITE_GATEWAY_URL}/ipfs/${imgdata}`}
+                                    alt="Issue screenshot"
+                                    className="w-full h-auto max-h-96 object-contain transition-transform duration-300 group-hover:scale-105"
+                                />
+                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300 flex items-center justify-center">
+                                    <ZoomIn className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                                 </div>
                             </div>
-
-                            {/* Image Modal */}
                         </div>
-          
+
+                        {/* Image Modal */}
+                    </div>
+
 
                     {/* Voting Section */}
                     <div className="bg-blue-800/20 backdrop-blur-sm rounded-xl border border-blue-700/30 p-6 mb-6">
                         <h2 className="text-xl font-semibold text-white mb-4">Community Voting</h2>
-                        <div className="flex items-center space-x-4 mb-6">
+                        <div className="flex items-center justify-center space-x-4 mb-6">
                             <button
-                                onClick={() => handleVote('agree')}
-                                className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-medium transition-all ${userVote === 'agree'
-                                    ? 'bg-green-500 text-white shadow-lg'
-                                    : 'bg-green-500/20 text-green-300 hover:bg-green-500/30'
-                                    }`}
-                            >
+                                className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-medium transition-all  bg-green-500 text-white shadow-lg cursor-pointer hover:bg-green-700`}
+                                onClick={handleaggrevote}
+                            >  {Tnxload ? <div className='w-full flex justify-center items-center '><div className='loder'></div></div> : <div className='flex '>
                                 <ThumbsUp className="w-5 h-5" />
-                                <span>Agree ({agreeCount})</span>
+                                <span>Agree</span>
+                            </div>}
                             </button>
                             <button
-                                onClick={() => handleVote('disagree')}
-                                className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-medium transition-all ${userVote === 'disagree'
-                                    ? 'bg-red-500 text-white shadow-lg'
-                                    : 'bg-red-500/20 text-red-300 hover:bg-red-500/30'
-                                    }`}
-                            >
-                                <ThumbsDown className="w-5 h-5" />
-                                <span>Disagree ({disagreeCount})</span>
+                                className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-medium transition-all  bg-red-500 text-white shadow-lg cursor-pointer hover:bg-red-700`}
+                                onClick={handledisaggrevote}
+                            >{dTnxload ? <div className='w-full flex justify-center items-center '><div className='loder'></div></div>
+                                : <div className='flex items-center justify-center'>
+                                    <ThumbsDown className="w-5 h-5" />
+                                    <span>Disagree</span>
+                                </div>}
                             </button>
                         </div>
 
                         {/* Voting Progress Bar */}
                         <div className="mb-4">
-                            <div className="flex justify-between text-sm text-gray-300 mb-2">
-                                <span>Agreement: {Math.round((agreeCount / (agreeCount + disagreeCount)) * 100)}%</span>
-                                <span>Total Votes: {agreeCount + disagreeCount}</span>
-                            </div>
-                            <div className="w-full bg-blue-900/50 rounded-full h-2">
-                                <div
-                                    className="bg-gradient-to-r from-green-500 to-cyan-400 h-2 rounded-full transition-all duration-500"
-                                    style={{ width: `${(agreeCount / (agreeCount + disagreeCount)) * 100}%` }}
-                                ></div>
+                            <div className="flex justify-center text-sm text-gray-300 mb-2">
+                                <span>Total Votes:{votedata.length}</span>
                             </div>
                         </div>
                     </div>
 
                     {/* Voting Addresses */}
-                    <div className="grid md:grid-cols-2 gap-6">
+                    <div className="flex items-center justify-center gap-6">
                         {/* Agree Addresses */}
                         <div className="bg-blue-800/20 backdrop-blur-sm rounded-xl border border-blue-700/30 p-6">
-                            <h3 className="text-lg font-semibold text-green-300 mb-4 flex items-center">
-                                <ThumbsUp className="w-5 h-5 mr-2" />
-                                Addresses that Agree ({agreeCount})
+                            <h3 className="text-lg font-semibold text-green-300 mb-4 flex items-center w-[50vw]">
+                                <Vote  className="w-5 h-5 mr-2" />
+                                Addresses that Agree and Disagree
                             </h3>
                             <div className="space-y-3 max-h-64 overflow-y-auto">
-                                {agreeAddresses.map((address, index) => (
+                                {votedata.map((data, index) => (
+                                    
                                     <div
                                         key={index}
-                                        className="flex items-center justify-between bg-green-500/10 border border-green-500/20 rounded-lg p-3"
+                                        className={`flex items-center justify-between ${data.args.Votevalue == 1 ? `bg-green-500/10 border border-green-500/20 ` : `bg-red-500/10 border border-red-500/20 `}rounded-lg p-3 `}
                                     >
-                                        <span className="text-green-300 font-mono text-sm">
-                                            {formatAddress(address)}
+                                        
+                                       
+                                        <span className={`${data.args.Votevalue == 1 ? `text-green-300 ` : `text-red-300 `} font-mono text-sm`}>
+                                            {`${data.args.Voter.slice(0, 6)}...${data.args.Voter.slice(-4)}`}
                                         </span>
-                                        <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                                        <div className={`${data.args.Votevalue == 1 ? `bg-green-500 ` : ` bg-red-500 `} rounded-4xl p-2 text-white font-bold`}>{data.args.Votevalue == 1 ? 'Agree' : 'Disagree'}</div>
                                     </div>
                                 ))}
-                                {agreeCount > 5 && (
-                                    <div className="text-center py-2">
-                                        <span className="text-gray-400 text-sm">
-                                            +{agreeCount - 5} more addresses
-                                        </span>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
 
-                        {/* Disagree Addresses */}
-                        <div className="bg-blue-800/20 backdrop-blur-sm rounded-xl border border-blue-700/30 p-6">
-                            <h3 className="text-lg font-semibold text-red-300 mb-4 flex items-center">
-                                <ThumbsDown className="w-5 h-5 mr-2" />
-                                Addresses that Disagree ({disagreeCount})
-                            </h3>
-                            <div className="space-y-3 max-h-64 overflow-y-auto">
-                                {disagreeAddresses.map((address, index) => (
-                                    <div
-                                        key={index}
-                                        className="flex items-center justify-between bg-red-500/10 border border-red-500/20 rounded-lg p-3"
-                                    >
-                                        <span className="text-red-300 font-mono text-sm">
-                                            {formatAddress(address)}
-                                        </span>
-                                        <div className="w-2 h-2 bg-red-400 rounded-full"></div>
-                                    </div>
-                                ))}
-                                {disagreeCount > 3 && (
-                                    <div className="text-center py-2">
-                                        <span className="text-gray-400 text-sm">
-                                            +{disagreeCount - 3} more addresses
-                                        </span>
-                                    </div>
-                                )}
                             </div>
                         </div>
                     </div>

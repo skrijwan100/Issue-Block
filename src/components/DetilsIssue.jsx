@@ -280,6 +280,7 @@ const IssueDetailsPage = () => {
                                         <span className={`${data.args.Votevalue == 1 ? `text-green-300 ` : `text-red-300 `} font-mono text-sm`}>
                                             {`${data.args.Voter.slice(0, 6)}...${data.args.Voter.slice(-4)}`}
                                         </span>
+                                        <span>{new Date(parseInt(data.args.time) * 1000).toLocaleString()}</span>
                                         <div className={`${data.args.Votevalue == 1 ? `bg-green-500 ` : ` bg-red-500 `} rounded-4xl p-2 text-white font-bold`}>{data.args.Votevalue == 1 ? 'Agree' : 'Disagree'}</div>
                                     </div>
                                 ))}

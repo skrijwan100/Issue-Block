@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {Vote , ArrowLeft, Calendar, User, ThumbsUp, ThumbsDown, AlertTriangle, Image as ImageIcon, ZoomIn } from 'lucide-react';
+import { Vote, ArrowLeft, Calendar, User, ThumbsUp, ThumbsDown, AlertTriangle, Image as ImageIcon, ZoomIn } from 'lucide-react';
 import { Link, useParams } from 'react-router';
 import { ethers } from 'ethers';
 import { BrowserProvider } from 'ethers';
@@ -18,6 +18,7 @@ const IssueDetailsPage = () => {
     const [dTnxload, setdTnxload] = useState(false)
     const [votedata, setvotedata] = useState([])
     const [reload, setreload] = useState(false)
+    const [votedone, setvotedone] = useState(false)
     useEffect(() => {
         const alldetiles = async () => {
             setloder(true)
@@ -55,13 +56,23 @@ const IssueDetailsPage = () => {
             const voteevent = await issuecontarct.queryFilter(allvote)
             console.log(voteevent)
             setvotedata(voteevent)
+            for (let i = 0; i < voteevent.length; i++) {
+                if (
+                    voteevent[i].args.Voter.toLowerCase() === fulladdress.toLowerCase()
+                ) {
+                    console.log(voteevent[i].args.Voter, fulladdress);
+                    setvotedone(true);
+                }
+            }
+
             // console.log(title, disciribe, I_img, Owner)
             setimgdata(I_img)
             setit(title)
             setiown(`${Owner.slice(0, 4)}...${Owner.slice(-4)}`)
             const res = await fetch(`https://${import.meta.env.VITE_GATEWAY_URL}/ipfs/${disciribe}`)
             const resdata = await res.json()
-            console.log(resdata)
+            // console.log(resdata)
+
             setidisc(resdata.story)
             setloder(false)
         }
@@ -70,23 +81,7 @@ const IssueDetailsPage = () => {
     }, [reload])
 
     // Sample voting addresses
-    const agreeAddresses = [
-        "0xe9f2a1b3c4d5e6f7g8h9i0j1k2l3m4n5o6p7q8r9s0t1u2v3w4x5y6z7",
-        "0xa1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6a7b8c9",
-        "0xf3e2d1c0b9a8f7e6d5c4b3a2f1e0d9c8b7a6f5e4d3c2b1a0f9e8d7c6b5",
-        "0xd4c3b2a1f0e9d8c7b6a5f4e3d2c1b0a9f8e7d6c5b4a3f2e1d0c9b8a7f6",
-        "0xb5a4f3e2d1c0b9a8f7e6d5c4b3a2f1e0d9c8b7a6f5e4d3c2b1a0f9e8d7"
-    ];
 
-    const disagreeAddresses = [
-        "0xc6b5a4f3e2d1c0b9a8f7e6d5c4b3a2f1e0d9c8b7a6f5e4d3c2b1a0f9e8",
-        "0xe8d7c6b5a4f3e2d1c0b9a8f7e6d5c4b3a2f1e0d9c8b7a6f5e4d3c2b1a0",
-        "0xa0f9e8d7c6b5a4f3e2d1c0b9a8f7e6d5c4b3a2f1e0d9c8b7a6f5e4d3c2"
-    ];
-
-    const formatAddress = (address) => {
-        return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
-    };
     const handleaggrevote = async (e) => {
         e.preventDefault();
         setTnxload(true)
@@ -166,14 +161,6 @@ const IssueDetailsPage = () => {
                                 <AlertTriangle className="w-6 h-6 text-cyan-400" />
                                 <h1 className="text-2xl font-bold text-white">{it}</h1>
                             </div>
-                            {/* <div className="flex items-center space-x-2">
-                                <span className="px-3 py-1 bg-red-500/20 text-red-300 rounded-full text-sm font-medium">
-                                    {issue.priority}
-                                </span>
-                                <span className="px-3 py-1 bg-green-500/20 text-green-300 rounded-full text-sm font-medium">
-                                    {issue.status}
-                                </span>
-                            </div> */}
                         </div>
 
                         <div className="flex items-center space-x-6 text-gray-300 text-sm mb-4">
@@ -231,8 +218,8 @@ const IssueDetailsPage = () => {
 
                     {/* Voting Section */}
                     <div className="bg-blue-800/20 backdrop-blur-sm rounded-xl border border-blue-700/30 p-6 mb-6">
-                        <h2 className="text-xl font-semibold text-white mb-4">Community Voting</h2>
-                        <div className="flex items-center justify-center space-x-4 mb-6">
+                        <h2 className="text-xl font-semibold text-white mb-4 text-center">Community Voting</h2>
+                        {votedone ? <div className=' text-green-500 text-2xl text-center font-bold mb-2'>You alrday done your vote</div> : <div className="flex items-center justify-center space-x-4 mb-6">
                             <button
                                 className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-medium transition-all  bg-green-500 text-white shadow-lg cursor-pointer hover:bg-green-700`}
                                 onClick={handleaggrevote}
@@ -250,7 +237,7 @@ const IssueDetailsPage = () => {
                                     <span>Disagree</span>
                                 </div>}
                             </button>
-                        </div>
+                        </div>}
 
                         {/* Voting Progress Bar */}
                         <div className="mb-4">
@@ -265,22 +252,22 @@ const IssueDetailsPage = () => {
                         {/* Agree Addresses */}
                         <div className="bg-blue-800/20 backdrop-blur-sm rounded-xl border border-blue-700/30 p-6">
                             <h3 className="text-lg font-semibold text-green-300 mb-4 flex items-center w-[50vw]">
-                                <Vote  className="w-5 h-5 mr-2" />
+                                <Vote className="w-5 h-5 mr-2" />
                                 Addresses that Agree and Disagree
                             </h3>
                             <div className="space-y-3 max-h-64 overflow-y-auto">
                                 {votedata.map((data, index) => (
-                                    
+
                                     <div
                                         key={index}
                                         className={`flex items-center justify-between ${data.args.Votevalue == 1 ? `bg-green-500/10 border border-green-500/20 ` : `bg-red-500/10 border border-red-500/20 `}rounded-lg p-3 `}
                                     >
-                                        
-                                       
+
+
                                         <span className={`${data.args.Votevalue == 1 ? `text-green-300 ` : `text-red-300 `} font-mono text-sm`}>
                                             {`${data.args.Voter.slice(0, 6)}...${data.args.Voter.slice(-4)}`}
                                         </span>
-                                        <span>{new Date(parseInt(data.args.time) * 1000).toLocaleString()}</span>
+                                        <span className='text-green-300'>{new Date(parseInt(data.args.time) * 1000).toLocaleString()}</span>
                                         <div className={`${data.args.Votevalue == 1 ? `bg-green-500 ` : ` bg-red-500 `} rounded-4xl p-2 text-white font-bold`}>{data.args.Votevalue == 1 ? 'Agree' : 'Disagree'}</div>
                                     </div>
                                 ))}

@@ -57,7 +57,8 @@ export default function BlockchainHomepage() {
                         </div>
                         <span className="text-white text-xl font-bold">IssueBlock</span>
                     </div>
-                    {navbtn?"":<div
+                    {navbtn?"":
+                    <div
                         className="flex items-center gap-4 px-4 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-semibold rounded-full transition-all duration-300 transform hover:scale-105 hover:shadow-lg cursor-pointer"
                         onClick={() => navigator.clipboard.writeText(address)}
                         title="Click to copy address"

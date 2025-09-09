@@ -275,7 +275,7 @@ export default function Issuesubmitpage() {
 
                     </div>
                 </main>}
-            <div className='flex items-center justify-center' style={{marginTop:"50px"}}>
+            {/* <div className='flex items-center justify-center' style={{marginTop:"50px"}}>
                 <div className="bg-white/5 backdrop-blur-lg rounded-2xl p-8 mb-12 border border-white/10 flex items-center justify-cente">
                     <Link to="/allissue"><button className="group relative px-8 py-4 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-2xl cursor-pointer">
                         <div className="flex items-center space-x-3 ">
@@ -285,7 +285,7 @@ export default function Issuesubmitpage() {
                         <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
                     </button></Link>
                 </div>
-            </div>
+            </div> */}
         </div>
     );
 }

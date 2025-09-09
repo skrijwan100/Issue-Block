@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
-import { Wallet, Shield, Zap, Globe } from 'lucide-react';
+import { Wallet, Shield, Zap, Globe, BadgeAlert } from 'lucide-react';
 import { ethers } from 'ethers';
 import Issuesubmitpage from './Issuesubmitpage';
+import { Link } from 'react-router';
 export default function BlockchainHomepage() {
     const [address, setAddress] = useState()
     const [bal, setBal] = useState()
     const [lode, setload] = useState(false)
     const [show, setShow] = useState()
-    const [navbtn,setnavbtn]=useState(true)
+    const [navbtn, setnavbtn] = useState(true)
     const { ethereum } = window;
     const handleconnect = async () => {
         setload(true)
@@ -57,28 +58,35 @@ export default function BlockchainHomepage() {
                         </div>
                         <span className="text-white text-xl font-bold">IssueBlock</span>
                     </div>
-                    {navbtn?"":
-                    <div
-                        className="flex items-center gap-4 px-4 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-semibold rounded-full transition-all duration-300 transform hover:scale-105 hover:shadow-lg cursor-pointer"
-                        onClick={() => navigator.clipboard.writeText(address)}
-                        title="Click to copy address"
-                    >
-                        <div style={{height:"15px",width:"15px",backgroundColor:"#00ff41",borderRadius:"50%"}}>
-
+                    <Link to="/allissue"><button className="group relative px-8 py-4 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-2xl cursor-pointer">
+                        <div className="flex items-center space-x-3 ">
+                            <BadgeAlert className="w-6 h-6" />
+                            <span className='cursor-pointer'>Show All the Issue</span>
                         </div>
+                        <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
+                    </button></Link>
+                    {navbtn ? "" :
+                        <div
+                            className="flex items-center gap-4 px-4 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-semibold rounded-full transition-all duration-300 transform hover:scale-105 hover:shadow-lg cursor-pointer"
+                            onClick={() => navigator.clipboard.writeText(address)}
+                            title="Click to copy address"
+                        >
+                            <div style={{ height: "15px", width: "15px", backgroundColor: "#00ff41", borderRadius: "50%" }}>
 
-                        {/* Address & Balance */}
-                        <div className="flex flex-col">
-                            <span className="text-sm font-mono truncate max-w-[150px]">{address}</span>
-                            <span className="text-xs opacity-80">{bal} SpETH</span>
-                        </div>
-                    </div>}
+                            </div>
+
+                            {/* Address & Balance */}
+                            <div className="flex flex-col">
+                                <span className="text-sm font-mono truncate max-w-[150px]">{address}</span>
+                                <span className="text-xs opacity-80">{bal} SpETH</span>
+                            </div>
+                        </div>}
 
                 </nav>
             </header>
 
             {/* Main content */}
-            {show ? <Issuesubmitpage/> : <main className="relative z-10 flex flex-col items-center justify-center min-h-[80vh] px-6">
+            {show ? <Issuesubmitpage /> : <main className="relative z-10 flex flex-col items-center justify-center min-h-[80vh] px-6">
                 <div className="text-center max-w-4xl mx-auto">
                     {/* Hero text */}
                     <h1 className="text-5xl md:text-7xl font-bold text-[#2e6dff] mb-6 leading-tight">
@@ -100,7 +108,7 @@ export default function BlockchainHomepage() {
                             <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
                         </button>
                     </div>
-                   
+
 
                     {/* Features grid */}
                     <div className="grid md:grid-cols-3 gap-6 mt-16">
